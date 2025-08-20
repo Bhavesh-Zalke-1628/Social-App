@@ -1,119 +1,11 @@
-// 'use client';
-
-// import { zodResolver } from '@hookform/resolvers/zod';
-// import { useForm } from 'react-hook-form';
-// import * as z from 'zod';
-// import { signIn } from 'next-auth/react';
-// import {
-//     Form,
-//     FormField,
-//     FormItem,
-//     FormLabel,
-//     FormMessage,
-// } from '@/components/ui/form';
-// import { Button } from '@/components/ui/button';
-// import { Input } from '@/components/ui/input';
-// import Link from 'next/link';
-// import { useRouter } from 'next/navigation';
-// import { signInScheama } from '@/schemas/signInScehma';
-// import { toast, useSonner } from 'sonner';
-// import { error } from 'console';
-
-// export default function SignInForm() {
-//     const router = useRouter();
-
-//     const form = useForm<z.infer<typeof signInScheama>>({
-//         resolver: zodResolver(signInScheama),
-//         defaultValues: {
-//             identifier: '',
-//             password: '',
-//         },
-//     });
-
-//     const { toasts } = useSonner();
-//     const onSubmit = async (data: z.infer<typeof signInScheama>) => {
-//         const result = await signIn('credentials', {
-//             redirect: false,
-//             identifier: data.identifier,
-//             password: data.password,
-//         });
-
-//         if (result?.error) {
-//             // if (result.error === 'CredentialsSignin') {
-//             //     toast({
-//             //         // title: 'Login Failed',
-//             //         description: 'Incorrect username or password',
-//             //         variant: 'destructive',
-//             //     });
-//             // } else {
-//             //     toast({
-//             //         // title: 'Error',
-//             //         description: result.error,
-//             //         variant: 'destructive',
-//             //     });
-//             // }
-//             console.log(result?.error)
-//         }
-
-//         if (result?.url) {
-//             router.replace('/dashboard');
-//         }
-//     };
-
-//     return (
-//         <div className="flex justify-center items-center min-h-screen bg-gray-800">
-//             <div className="w-full max-w-md p-8 space-y-8 bg-white rounded-lg shadow-md">
-//                 <div className="text-center">
-//                     <h1 className="text-4xl font-extrabold tracking-tight lg:text-5xl mb-6">
-//                         Welcome Back to True Feedback
-//                     </h1>
-//                     <p className="mb-4">Sign in to continue your secret conversations</p>
-//                 </div>
-//                 <Form {...form}>
-//                     <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-//                         <FormField
-//                             name="identifier"
-//                             control={form.control}
-//                             render={({ field }) => (
-//                                 <FormItem>
-//                                     <FormLabel>Email/Username</FormLabel>
-//                                     <Input {...field} />
-//                                     <FormMessage />
-//                                 </FormItem>
-//                             )}
-//                         />
-//                         <FormField
-//                             name="password"
-//                             control={form.control}
-//                             render={({ field }) => (
-//                                 <FormItem>
-//                                     <FormLabel>Password</FormLabel>
-//                                     <Input type="password" {...field} />
-//                                     <FormMessage />
-//                                 </FormItem>
-//                             )}
-//                         />
-//                         <Button className='w-full' type="submit">Sign In</Button>
-//                     </form>
-//                 </Form>
-//                 <div className="text-center mt-4">
-//                     <p>
-//                         Not a member yet?{' '}
-//                         <Link href="/sign-up" className="text-blue-600 hover:text-blue-800">
-//                             Sign up
-//                         </Link>
-//                     </p>
-//                 </div>
-//             </div>
-//         </div>
-//     );
-// }
-
 'use client';
 
 import { useState } from 'react';
 import Link from 'next/link';
 import { Eye, EyeOff, Mail, Lock, Sparkles, ArrowRight, Github, Chrome } from 'lucide-react';
+import { signIn } from 'next-auth/react';
+import { useRouter } from 'next/navigation';
+import toast from 'react-hot-toast';
 
 export default function Login() {
     const [showPassword, setShowPassword] = useState(false);
@@ -122,6 +14,8 @@ export default function Login() {
         password: '',
         rememberMe: false
     });
+    const [error, setError] = useState('');
+    const router = useRouter();
 
     const handleChange = (e: any) => {
         const { name, value, type, checked } = e.target;
@@ -131,11 +25,24 @@ export default function Login() {
         }));
     };
 
-    const handleSubmit = (e: any) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        // Handle login logic here
-        console.log('Login:', formData);
+
+        const res = await signIn("credentials", {
+            redirect: false,
+            identifier: formData.email,
+            password: formData.password,
+        });
+
+        if (res?.error) {
+            setError(res.error); // Show error UI
+        } else {
+            toast.success("Login successfully", { duration: 3000, position: 'top-center' })
+            router.push("/dashboard");
+        }
     };
+
+
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-black via-zinc-900 to-neutral-800 flex items-center justify-center p-6">
@@ -228,6 +135,9 @@ export default function Login() {
                             </Link>
                         </div>
 
+                        {/* Error Message */}
+                        {error && <p className="text-red-400 text-sm">{error}</p>}
+
                         {/* Sign In Button */}
                         <button
                             type="submit"
@@ -249,10 +159,11 @@ export default function Login() {
                             </div>
                         </div>
 
-                        {/* Social Login */}
+                        {/* Social Login (Google, GitHub ke liye NextAuth configure karna padega) */}
                         <div className="grid grid-cols-2 gap-4">
                             <button
                                 type="button"
+                                onClick={() => signIn("google")}
                                 className="flex items-center justify-center gap-2 py-3 px-4 bg-white/5 border border-white/20 rounded-xl text-white hover:bg-white/10 transition-all duration-300"
                             >
                                 <Chrome className="w-5 h-5" />
@@ -260,6 +171,7 @@ export default function Login() {
                             </button>
                             <button
                                 type="button"
+                                onClick={() => signIn("github")}
                                 className="flex items-center justify-center gap-2 py-3 px-4 bg-white/5 border border-white/20 rounded-xl text-white hover:bg-white/10 transition-all duration-300"
                             >
                                 <Github className="w-5 h-5" />

@@ -1,8 +1,7 @@
 import mongoose, { mongo } from "mongoose";
 import { config } from "dotenv";
 config()
-// const MONGODB_URI = "mongodb+srv://bhaveshzalke:bhaveshzalke@cluster0.b7odtn0.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0"
-const MONGODB_URI = "mongodb+srv://bhaveshzalke:bhaveshzalke@cluster0.bwql78t.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0"
+const MONGODB_URI = "mongodb+srv://zalkebhavesh:j0AVai8KaLYMuS0A@cluster0.ka1odf9.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0"
 type CoonectionObject = {
     isConnected?: number
 }

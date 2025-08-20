@@ -12,8 +12,6 @@ export async function POST(request: Request) {
     try {
         const { username, email, password } = await request.json();
 
-        console.log("Incoming data:", username, email, password);
-
         // Validate fields
         if (!username || !email || !password) {
             return Response.json(
@@ -28,6 +26,7 @@ export async function POST(request: Request) {
             isVerified: true,
         });
 
+
         if (existingVerifiedUser) {
             return Response.json(
                 { success: false, message: "Username already taken" },
@@ -37,6 +36,7 @@ export async function POST(request: Request) {
 
         // Check if email exists
         const existingUserByEmail = await UserModel.findOne({ email });
+
 
         const verifyCode = Math.floor(100000 + Math.random() * 900000).toString();
 
@@ -65,7 +65,6 @@ export async function POST(request: Request) {
             });
 
             const savedUser = await newUser.save();
-            console.log("✅ Created User:", savedUser.toObject());
         }
 
         // Send verification email

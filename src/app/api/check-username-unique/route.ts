@@ -12,7 +12,6 @@ export const usernameQuerySchema = z.object({
 
 export async function GET(request: Request) {
 
-    console.log(request.method)
     await dbConnect()
 
 
@@ -21,10 +20,8 @@ export async function GET(request: Request) {
         const queryParam = {
             username: searchParams.get('username')
         }
-        console.log("queryParam", queryParam)
 
         const result = usernameQuerySchema.safeParse(queryParam)
-        console.log("result", result)
 
 
         if (!result.success) {
@@ -38,12 +35,10 @@ export async function GET(request: Request) {
 
 
         const { username } = result?.data;
-        console.log(result.data)
 
 
         const existingVerifiedUsr = await UserModel.findOne({ username, isVerified: true })
 
-        console.log("existingVerifiedUsr", existingVerifiedUsr)
 
         if (existingVerifiedUsr) {
             return Response.json({ success: false, message: "username  already taked" }, { status: 400 })

@@ -7,8 +7,13 @@ import { Eye, EyeOff, Mail, Lock, User, Sparkles, ArrowRight, Github, Chrome, Ch
 import axios, { AxiosError } from 'axios'
 import { useDebounceValue } from 'usehooks-ts'
 import { ApiResponse } from '@/types/response';
+import { useRouter } from 'next/navigation';
+import toast from 'react-hot-toast';
 
 export default function Signup() {
+
+    const router = useRouter()
+
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
     const [isCheckingUsername, setIsCheckingUsername] = useState(false);
@@ -35,13 +40,11 @@ export default function Signup() {
                     const response = await axios.get<ApiResponse>(
                         `/api/check-username-unique?username=${debouncedUsername}`
                     );
-                    console.log("response", response)
                     setUsernameMessage(response.data.message);
                     if (!response) {
                         setUsernameMessage("username already taken");
                     }
                 } catch (error: any) {
-                    console.log(error?.response?.data?.message || error.message)
                     setUsernameMessage(error?.response?.data?.message)
                 } finally {
                     setIsCheckingUsername(false);
@@ -86,7 +89,6 @@ export default function Signup() {
             return;
         }
 
-        console.log("usernameMessage", usernameMessage)
 
         // Check if username is available (assuming error message means unavailable)
         if (usernameMessage && usernameMessage.toLowerCase().includes('taken')) {
@@ -103,8 +105,20 @@ export default function Signup() {
             });
 
             // Handle successful signup
-            console.log('Signup successful:', response.data);
             // You might want to redirect or show success message here
+            if (response.data.success) {
+                toast.success(`${response?.data?.message}`, { duration: 5000 })
+                router.push('/sign-in')
+                setFormData(
+                    {
+                        username: '',
+                        email: '',
+                        password: '',
+                        confirmPassword: '',
+                        agreeToTerms: false
+                    }
+                )
+            }
 
         } catch (error) {
             const axiosError = error as AxiosError<ApiResponse>;

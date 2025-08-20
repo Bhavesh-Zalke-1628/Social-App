@@ -10,6 +10,7 @@ export interface User extends Document {
     coverImage?: string;
     location?: string;
     website?: string;
+    mobile?: number,
 
     followers: mongoose.Types.ObjectId[];
     following: mongoose.Types.ObjectId[];
@@ -44,8 +45,9 @@ const UserSchema: Schema<User> = new Schema(
         },
         name: {
             type: String,
-            required: [true, "Name is required"],
+            // required: [true, "Name is required"],
             trim: true,
+            default: "Shamrao"
         },
         bio: {
             type: String,
@@ -67,7 +69,10 @@ const UserSchema: Schema<User> = new Schema(
             type: String,
             default: "",
         },
-
+        mobile: {
+            type: Number,
+            default: 1234567890
+        },
         followers: [
             {
                 type: Schema.Types.ObjectId,
