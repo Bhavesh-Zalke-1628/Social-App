@@ -59,7 +59,7 @@ const UserSchema: Schema<User> = new Schema(
         },
         coverImage: {
             type: String,
-            default: "",
+            default: "https://images.unsplash.com/photo-1519904981063-b0cf448d479e?w=1200&h=400&fit=crop",
         },
         location: {
             type: String,

@@ -44,6 +44,7 @@ interface Conversation {
 }
 
 const conversationsData: Conversation[] = [
+    // ...same as your provided conversationsData array...
     {
         id: 1,
         user: 'Alice Johnson',
@@ -109,6 +110,34 @@ const conversationsData: Conversation[] = [
         ],
     },
 ];
+
+// Loader Component
+const Loader = () => (
+    <div
+        className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-40 z-[9999]"
+        style={{ backdropFilter: "blur(4px)" }}
+    >
+        <div className="flex flex-col items-center justify-center">
+            {/* Spinner */}
+            <svg className="w-12 h-12 animate-spin text-pink-500" viewBox="0 0 24 24" fill="none">
+                <circle
+                    className="opacity-20"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    strokeWidth="4"
+                />
+                <path
+                    className="opacity-80"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8v4l4-4-4-4v4a12 12 0 00-12 12h4z"
+                />
+            </svg>
+            <span className="mt-2 text-pink-400 font-semibold text-lg">Loading...</span>
+        </div>
+    </div>
+);
 
 const StatusIcon = ({ status }: { status?: string }) => {
     switch (status) {
@@ -182,6 +211,7 @@ export default function MessageDashboard() {
     const [searchQuery, setSearchQuery] = useState('');
     const [messageText, setMessageText] = useState('');
     const [conversations, setConversations] = useState(conversationsData);
+    const [loading, setLoading] = useState(false); // Loader state
     const messagesEndRef = useRef<HTMLDivElement>(null);
 
     const selectedConversation = conversations.find((conv) => conv.id === selectedConvId) ?? null;
@@ -202,6 +232,10 @@ export default function MessageDashboard() {
         setSelectedConvId(convId);
         setSidebarOpen(false);
 
+        // Example: show loader for 500ms when opening a conversation
+        setLoading(true);
+        setTimeout(() => setLoading(false), 500);
+
         // Mark messages as read
         setConversations(prev =>
             prev.map(conv =>
@@ -213,6 +247,8 @@ export default function MessageDashboard() {
     const handleSendMessage = () => {
         if (!messageText.trim() || !selectedConversation) return;
 
+        setLoading(true); // Show loader on message send
+
         const newMessage: Message = {
             id: Date.now(),
             text: messageText.trim(),
@@ -221,15 +257,17 @@ export default function MessageDashboard() {
             status: 'sent'
         };
 
-        setConversations(prev =>
-            prev.map(conv =>
-                conv.id === selectedConversation.id
-                    ? { ...conv, messages: [...conv.messages, newMessage] }
-                    : conv
-            )
-        );
-
-        setMessageText('');
+        setTimeout(() => {
+            setConversations(prev =>
+                prev.map(conv =>
+                    conv.id === selectedConversation.id
+                        ? { ...conv, messages: [...conv.messages, newMessage] }
+                        : conv
+                )
+            );
+            setMessageText('');
+            setLoading(false); // Hide loader after sending
+        }, 500);
     };
 
     const handleKeyPress = (e: React.KeyboardEvent) => {
@@ -241,6 +279,8 @@ export default function MessageDashboard() {
 
     return (
         <div className="flex h-screen bg-gray-900 text-gray-200 relative overflow-hidden">
+            {loading && <Loader />}
+
             {/* Mobile Overlay */}
             {sidebarOpen && (
                 <div
@@ -291,7 +331,6 @@ export default function MessageDashboard() {
                             </button>
                         </div>
                     </div>
-
                     {/* Search Bar */}
                     <div className="relative">
                         <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
@@ -304,7 +343,6 @@ export default function MessageDashboard() {
                         />
                     </div>
                 </div>
-
                 {/* Conversation List */}
                 <div className="flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-700 scrollbar-track-transparent">
                     {filteredConversations.length === 0 ? (
@@ -325,7 +363,6 @@ export default function MessageDashboard() {
                         </ul>
                     )}
                 </div>
-
                 {/* New Conversation Button */}
                 <div className="p-4 border-t border-gray-700/50">
                     <button className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 rounded-xl text-white font-semibold shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-[1.02]">
@@ -349,7 +386,6 @@ export default function MessageDashboard() {
                                 >
                                     <ArrowLeft className="w-5 h-5" />
                                 </button>
-
                                 <button
                                     onClick={() => setSidebarOpen(true)}
                                     className="hidden md:block lg:hidden p-2 hover:bg-gray-700/50 rounded-lg transition-colors"
@@ -357,7 +393,6 @@ export default function MessageDashboard() {
                                 >
                                     <Menu className="w-5 h-5" />
                                 </button>
-
                                 <div className="relative">
                                     <img
                                         src={selectedConversation.avatar}
@@ -368,7 +403,6 @@ export default function MessageDashboard() {
                                         <div className="absolute -bottom-1 -right-1 w-3 h-3 bg-green-500 border-2 border-gray-800 rounded-full"></div>
                                     )}
                                 </div>
-
                                 <div>
                                     <h3 className="font-semibold text-white">
                                         {selectedConversation.user}
@@ -378,7 +412,6 @@ export default function MessageDashboard() {
                                     </p>
                                 </div>
                             </div>
-
                             <div className="flex items-center gap-2">
                                 <button className="p-2.5 hover:bg-gray-700/50 rounded-lg transition-colors" title="Voice call">
                                     <Phone className="w-5 h-5 text-gray-300" />
@@ -398,7 +431,6 @@ export default function MessageDashboard() {
                                 </button>
                             </div>
                         </header>
-
                         {/* Messages */}
                         <main className="flex-1 p-4 overflow-y-auto space-y-4 bg-gradient-to-b from-gray-900/50 to-gray-900 scrollbar-thin scrollbar-thumb-gray-700 scrollbar-track-transparent">
                             {selectedConversation.messages.map((msg, index) => (
@@ -425,7 +457,6 @@ export default function MessageDashboard() {
                             ))}
                             <div ref={messagesEndRef} />
                         </main>
-
                         {/* Message Input */}
                         <footer className="p-4 border-t border-gray-700/50 bg-gray-800/30 backdrop-blur-md">
                             <div className="flex items-end gap-3">
@@ -437,7 +468,6 @@ export default function MessageDashboard() {
                                         <Image className="w-5 h-5 text-gray-400" />
                                     </button>
                                 </div>
-
                                 <div className="flex-1 relative">
                                     <textarea
                                         value={messageText}
@@ -452,7 +482,6 @@ export default function MessageDashboard() {
                                         <Smile className="w-4 h-4 text-gray-400" />
                                     </button>
                                 </div>
-
                                 <div className="flex gap-2">
                                     <button className="p-2.5 hover:bg-gray-700/50 rounded-lg transition-colors">
                                         <Mic className="w-5 h-5 text-gray-400" />
@@ -477,7 +506,6 @@ export default function MessageDashboard() {
                         >
                             <Menu className="w-6 h-6" />
                         </button>
-
                         <div className="mb-8 relative">
                             <div className="animate-pulse">
                                 <div className="w-24 h-24 bg-gradient-to-br from-pink-500/20 to-purple-600/20 rounded-full flex items-center justify-center backdrop-blur-sm border border-pink-500/10">
@@ -488,16 +516,13 @@ export default function MessageDashboard() {
                                 <div className="w-24 h-24 bg-gradient-to-br from-pink-500/10 to-purple-600/10 rounded-full"></div>
                             </div>
                         </div>
-
                         <h2 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-pink-400 via-purple-400 to-pink-400 bg-clip-text text-transparent mb-4">
                             Welcome to Messages
                         </h2>
-
                         <p className="text-gray-400 max-w-md text-sm sm:text-base leading-relaxed mb-8">
                             Select a conversation from the sidebar to start chatting with your friends.
                             Share moments, stay connected, and make every message count ✨
                         </p>
-
                         <div className="flex flex-col sm:flex-row gap-4">
                             <button
                                 onClick={() => setSidebarOpen(true)}
@@ -512,7 +537,6 @@ export default function MessageDashboard() {
                     </div>
                 )}
             </div>
-
             <style jsx>{`
                 .scrollbar-thin {
                     scrollbar-width: thin;

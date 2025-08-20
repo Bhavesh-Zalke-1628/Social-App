@@ -21,8 +21,10 @@ import {
     ExternalLink
 } from 'lucide-react';
 import CreatePostModal from '@/app/(modal)/CreatePostModal';
+import { useDispatch, useSelector } from 'react-redux';
+import { getProfile } from '@/Redux/Slice/authSlice';
 
-// Mock user data for demonstration
+// Mock user? data for demonstration
 const mockUser = {
     name: "Sarah Johnson",
     username: "sarah_j",
@@ -77,10 +79,10 @@ const StatItem = ({ count, label, href }: StatItemProps) => {
     const content = (
         <div className="cursor-pointer hover:text-pink-400 transition-all duration-200 group text-center">
             <div className="text-xl font-bold text-white group-hover:text-pink-400 transition-colors">
-                {count.toLocaleString()}
+                {/* {count.toLocaleString()} */}
             </div>
             <div className="text-sm text-gray-400 group-hover:text-pink-300 transition-colors">
-                {label}
+                {/* {label} */}
             </div>
         </div>
     );
@@ -148,21 +150,21 @@ const PostGrid = ({ posts, onCreatePost }: PostGridProps) => (
     </div>
 );
 
-const AboutSection = ({ user }: { user: typeof mockUser }) => (
+const AboutSection = ({ user?}: { user?: typeof mockUser }) => (
     <div className="p-6 space-y-6">
         <h3 className="text-lg font-semibold text-white mb-4">About Me</h3>
 
         <div className="space-y-4">
             <div className="bg-gray-700/30 rounded-lg p-4">
                 <h4 className="text-white font-medium mb-2">Bio</h4>
-                <p className="text-gray-300 leading-relaxed">{user.bio}</p>
+                <p className="text-gray-300 leading-relaxed">{user?.bio}</p>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="bg-gray-700/30 rounded-lg p-4">
                     <h4 className="text-white font-medium mb-2">Member Since</h4>
                     <p className="text-gray-300">
-                        {new Date(user.createdAt).toLocaleDateString(undefined, {
+                        {new Date(user?.createdAt).toLocaleDateString(undefined, {
                             year: 'numeric',
                             month: 'long',
                             day: 'numeric',
@@ -173,7 +175,7 @@ const AboutSection = ({ user }: { user: typeof mockUser }) => (
                 <div className="bg-gray-700/30 rounded-lg p-4">
                     <h4 className="text-white font-medium mb-2">Activity</h4>
                     <p className="text-gray-300">
-                        {user.posts.length} posts, {user.followers.length} followers
+                        {user?.posts.length} posts, {user?.followers.length} followers
                     </p>
                 </div>
             </div>
@@ -182,14 +184,17 @@ const AboutSection = ({ user }: { user: typeof mockUser }) => (
 );
 
 export default function ProfilePage() {
-    const [user] = useState(mockUser);
+    // const [user?] = useState(mockUser);
     const [activeTab, setActiveTab] = useState<'posts' | 'about'>('posts');
     const [showFullBio, setShowFullBio] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
-    // Example usage in your page/component
     const [showPostModal, setShowPostModal] = useState(false);
+    const dispatch = useDispatch()
+    const { user } = useSelector(state => state?.auth)
 
-
+    useEffect(() => {
+        dispatch(getProfile())
+    }, []);
     const handleEditProfile = () => {
         alert("Edit profile functionality would open here");
     };
@@ -200,8 +205,8 @@ export default function ProfilePage() {
 
     const handleShare = () => {
         navigator.share?.({
-            title: `${user.name}'s Profile`,
-            text: `Check out ${user.name}'s profile`,
+            title: `${user?.name}'s Profile`,
+            text: `Check out ${user?.name}'s profile`,
             url: window.location.href
         }) || alert("Profile link copied to clipboard!");
     };
@@ -229,7 +234,7 @@ export default function ProfilePage() {
                     >
                         <ArrowLeft className="w-5 h-5" />
                     </button>
-                    <h1 className="font-semibold text-white truncate">{user.username}</h1>
+                    <h1 className="font-semibold text-white truncate">{user?.username}</h1>
                     <button
                         className="p-2 hover:bg-gray-700 rounded-full transition-colors"
                         onClick={handleSettings}
@@ -242,7 +247,7 @@ export default function ProfilePage() {
             {/* Cover Section */}
             <div className="relative w-full h-48 sm:h-60 lg:h-80 overflow-hidden">
                 <img
-                    src={user.cover}
+                    src={user?.coverImage}
                     alt="Profile cover"
                     className="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
                 />
@@ -274,8 +279,8 @@ export default function ProfilePage() {
                     {/* Avatar */}
                     <div className="relative flex-shrink-0">
                         <img
-                            src={user.avatar}
-                            alt={`${user.name}'s avatar`}
+                            src={user?.avatar}
+                            alt={`${user?.name}'s avatar`}
                             className="w-28 h-28 sm:w-36 sm:h-36 rounded-full border-4 border-gray-800 shadow-2xl bg-gray-700 transition-transform duration-200 hover:scale-105"
                         />
                         <button
@@ -291,20 +296,20 @@ export default function ProfilePage() {
                     <div className="flex-1 text-center sm:text-left min-w-0 space-y-3">
                         <div>
                             <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white mb-1">
-                                {user.name}
+                                {user?.name}
                             </h1>
                             <p className="text-gray-400 text-base sm:text-lg">
-                                @{user.username}
+                                @{user?.username}
                             </p>
                         </div>
 
                         {/* Bio */}
                         <div className="max-w-2xl">
-                            <p className={`text-gray-300 leading-relaxed ${!showFullBio && user.bio.length > 150 ? 'line-clamp-3' : ''
+                            <p className={`text-gray-300 leading-relaxed ${!showFullBio && user?.bio.length > 150 ? 'line-clamp-3' : ''
                                 }`}>
-                                {user.bio}
+                                {user?.bio}
                             </p>
-                            {user.bio.length > 150 && (
+                            {user?.bio.length > 150 && (
                                 <button
                                     onClick={() => setShowFullBio(!showFullBio)}
                                     className="text-pink-400 hover:text-pink-300 text-sm mt-2 font-medium transition-colors"
@@ -339,19 +344,19 @@ export default function ProfilePage() {
                     {/* Stats */}
                     <div className="flex items-center justify-center sm:justify-start gap-8">
                         <StatItem
-                            count={user.posts.length}
+                            count={user?.posts.length}
                             label="Posts"
-                            href={`/profile/${user.username}/posts`}
+                            href={`/profile/${user?.username}/posts`}
                         />
                         <StatItem
-                            count={user.followers.length}
+                            count={user?.followers.length}
                             label="Followers"
-                            href={`/profile/${user.username}/followers`}
+                            href={`/profile/${user?.username}/followers`}
                         />
                         <StatItem
-                            count={user.following.length}
+                            count={user?.following.length}
                             label="Following"
-                            href={`/profile/${user.username}/following`}
+                            href={`/profile/${user?.username}/following`}
                         />
                     </div>
 
@@ -368,22 +373,22 @@ export default function ProfilePage() {
                 <section className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
                     <ContactCard
                         icon={<Mail className="w-4 h-4 text-pink-400" />}
-                        value={user.email}
+                        value={user?.email}
                         colorClass="pink"
                     />
                     <ContactCard
                         icon={<Phone className="w-4 h-4 text-purple-400" />}
-                        value={user.mobile}
+                        value={user?.mobile}
                         colorClass="purple"
                     />
                     <ContactCard
                         icon={<MapPin className="w-4 h-4 text-blue-400" />}
-                        value={user.location}
+                        value={user?.location}
                         colorClass="blue"
                     />
                     <ContactCard
                         icon={<Calendar className="w-4 h-4 text-green-400" />}
-                        value={`Joined ${new Date(user.createdAt).toLocaleDateString(undefined, {
+                        value={`Joined ${new Date(user?.createdAt).toLocaleDateString(undefined, {
                             year: 'numeric',
                             month: 'short'
                         })}`}
